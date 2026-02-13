@@ -105,20 +105,52 @@ const Hero = () => (
 const LoveLetter = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setIsVisible(true); }, { threshold: 0.3 });
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => { if (sectionRef.current) observer.unobserve(sectionRef.current); };
-  }, []);
+    // 1. Capture the current ref value in a variable
+    const currentSection = sectionRef.current;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true);
+      },
+      { threshold: 0.3 }
+    );
+
+    // 2. Use the variable for observing
+    if (currentSection) {
+      observer.observe(currentSection);
+    }
+
+    return () => {
+      // 3. Use the variable for cleanup
+      if (currentSection) {
+        observer.unobserve(currentSection);
+      }
+    };
+  }, []); // Empty dependency array is fine now
 
   const letterText = `My Dearest Babyy,\n\nHappy Valentine’s Day!\n\nI know you’ve trusted me with parts of yourself that aren’t easy to talk about. Parts that are sensitive. Parts shaped by things that hurt you before I ever came into your life. I want you to know something very clearly — I see you, and I respect you for that trust.\n\nYou are not “too much.”\nYou are not fragile in a bad way.\nYou are not difficult to love.\n\nYou are human. You are soft. And that softness is one of the most beautiful things about you.\n\nLoving you has taught me patience, care, and gentleness. It’s taught me to listen instead of rushing. To understand instead of assuming. To hold space for you when you need it, and to hold you closer when the world feels loud.\n\nI know some days are harder than others. I know your heart feels deeply, and sometimes that can feel overwhelming. But I want you to remember this — you never have to hide those parts of yourself with me.\n\nI’m not here just for the happy moments.\nI’m here for the quiet ones.\nThe anxious ones.\nThe sensitive ones.\n\nDistance hasn’t made me love you less — it’s made me more intentional. More sure. More grateful that you chose to open your heart to me.\n\nThank you for trusting me with the real you.\nThank you for staying.\nThank you for loving me even when it isn’t easy.\n\nThis is our second Valentine’s Day. And it doesn’t feel like a moment — it feels like a promise.\n\nAnd on February 17, one year ago, we started something real. Something honest. Something worth protecting.\n\nOne year down — and I’m still here.\nStill choosing you.\nStill loving you gently.\n\nHappy Valentine’s Day, Babyy.\nYou are safe with me. Always.`;
 
   return (
     <section ref={sectionRef} className="py-24 px-6">
       <div className="max-w-4xl mx-auto">
-        <motion.h2 className="font-serif text-4xl md:text-5xl text-rose-600 text-center mb-12" initial={{ opacity: 0 }} animate={isVisible ? { opacity: 1 } : {}}>A Letter for You</motion.h2>
-        <motion.div className="bg-white paper-texture rounded-3xl p-8 md:p-12 shadow-soft border border-rose-100" initial={{ opacity: 0, y: 50 }} animate={isVisible ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.3, duration: 1 }}>
-          <p className="font-handwriting text-2xl md:text-3xl text-text-dark leading-relaxed whitespace-pre-line">{letterText}</p>
+        <motion.h2
+          className="font-serif text-4xl md:text-5xl text-rose-600 text-center mb-12"
+          initial={{ opacity: 0 }}
+          animate={isVisible ? { opacity: 1 } : {}}
+        >
+          A Letter for You
+        </motion.h2>
+        <motion.div
+          className="bg-white paper-texture rounded-3xl p-8 md:p-12 shadow-soft border border-rose-100"
+          initial={{ opacity: 0, y: 50 }}
+          animate={isVisible ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.3, duration: 1 }}
+        >
+          <p className="font-handwriting text-2xl md:text-3xl text-text-dark leading-relaxed whitespace-pre-line">
+            {letterText}
+          </p>
         </motion.div>
       </div>
     </section>
@@ -162,7 +194,7 @@ const ReasonsGrid = () => {
 const PhotoGallery = () => {
   const photos = Array.from({ length: 14 }, (_, i) => ({
     id: i,
-    url: `/v1/${i + 1}.png`, 
+    url: `/v1/${i + 1}.png`,
     rotation: [2, -3, 1, -2, 3, -1, 2, -2, 1, -3, 2, -1, 3, -2][i]
   }));
 
@@ -172,21 +204,21 @@ const PhotoGallery = () => {
         <h2 className="font-serif text-4xl md:text-5xl text-rose-600 mb-16">Our Memories Together</h2>
         <div className="columns-1 md:columns-3 gap-8 space-y-8">
           {photos.map((photo, index) => (
-            <motion.div 
-              key={photo.id} 
-              className="break-inside-avoid bg-white p-4 rounded-lg shadow-md" 
-              style={{ transform: `rotate(${photo.rotation}deg)` }} 
-              initial={{ opacity: 0, scale: 0.8 }} 
-              whileInView={{ opacity: 1, scale: 1 }} 
+            <motion.div
+              key={photo.id}
+              className="break-inside-avoid bg-white p-4 rounded-lg shadow-md"
+              style={{ transform: `rotate(${photo.rotation}deg)` }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               whileHover={{ scale: 1.1, rotate: 0, zIndex: 10 }}
             >
-              <img 
-                src={photo.url} 
-                alt={`Memory ${index + 1}`} 
-                className="w-full h-auto rounded" 
-                loading="lazy" 
+              <img
+                src={photo.url}
+                alt={`Memory ${index + 1}`}
+                className="w-full h-auto rounded"
+                loading="lazy"
                 onError={(e) => {
-                  e.target.style.display = 'none'; 
+                  e.target.style.display = 'none';
                   console.error(`Missing image: ${photo.url}`);
                 }}
               />
@@ -268,7 +300,7 @@ export default function App() {
   const handleTrackEnded = () => {
     const nextTrack = activeTrack === 1 ? 2 : 1;
     setActiveTrack(nextTrack);
-    
+
     // Use a timeout to ensure state update before playing
     setTimeout(() => {
       const nextRef = nextTrack === 1 ? audioRef1 : audioRef2;
@@ -314,17 +346,17 @@ export default function App() {
   return (
     <div className="App relative bg-rose-50 min-h-screen">
       {/* Audio tags with auto-advance logic */}
-      <audio 
-        ref={audioRef1} 
-        src="/music1.mp3" 
-        onError={handleAudioError} 
-        onEnded={handleTrackEnded} 
+      <audio
+        ref={audioRef1}
+        src="/music1.mp3"
+        onError={handleAudioError}
+        onEnded={handleTrackEnded}
       />
-      <audio 
-        ref={audioRef2} 
-        src="/music2.mp3" 
-        onError={handleAudioError} 
-        onEnded={handleTrackEnded} 
+      <audio
+        ref={audioRef2}
+        src="/music2.mp3"
+        onError={handleAudioError}
+        onEnded={handleTrackEnded}
       />
 
       <AnimatePresence>
@@ -342,7 +374,7 @@ export default function App() {
             <FloatingHearts />
             <FallingPetals />
             <VolumeMixer audioRef1={audioRef1} audioRef2={audioRef2} />
-            
+
             <div className="fixed bottom-6 right-6 z-50 flex gap-3">
               <button onClick={switchTrack} className="w-14 h-14 rounded-full bg-rose-100/80 backdrop-blur-md flex items-center justify-center shadow-floating">
                 <SkipForward className="text-rose-600" size={20} />
@@ -359,7 +391,7 @@ export default function App() {
             <SpotifyReveal />
             <CountdownTimer />
             <footer className="py-16 text-center">
-              <Heart className="text-rose-500 mx-auto" fill="currentColor"/>
+              <Heart className="text-rose-500 mx-auto" fill="currentColor" />
               <p className="font-handwriting text-3xl text-rose-600">Happy Valentine's Day, Babyy.</p>
             </footer>
           </motion.div>
